@@ -1,0 +1,46 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Validation Report</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 40px; }
+                .success { color: green; }
+                .failure { color: red; }
+                .metric { margin: 10px 0; }
+                table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background-color: #4CAF50; color: white; }
+            </style>
+        </head>
+        <body>
+            <h1>Data Validation Report</h1>
+            <p><strong>Timestamp:</strong> 2025-10-29T06:28:22.670468</p>
+            
+            <div class="failure">
+                <h2>Status: ✗ FAILED</h2>
+            </div>
+            
+            <div class="metric">
+                <strong>Evaluated Expectations:</strong> 12
+            </div>
+            <div class="metric">
+                <strong>Successful:</strong> 11
+            </div>
+            <div class="metric">
+                <strong>Failed:</strong> 1
+            </div>
+            <div class="metric">
+                <strong>Success Rate:</strong> 91.7%
+            </div>
+            
+            <h3>Failed Expectations:</h3><table><tr><th>Expectation Type</th><th>Column</th><th>Details</th></tr>
+            <tr>
+                <td>expect_table_columns_to_match_ordered_list</td>
+                <td>N/A</td>
+                <td>{'observed_value': ['userId', 'movieId', 'rating', 'timestamp', 'user_idx', 'movie_idx'], 'details': {'mismatched': [{'Expected Column Position': 0, 'Expected': 'user_idx', 'Found': 'userId'}, {'Expec</td>
+            </tr>
+            </table>
+        </body>
+        </html>
+        

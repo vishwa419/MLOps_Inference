@@ -1,0 +1,40 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'mlops-monitor'
+
+scrape_configs:
+  # BentoML Service
+  - job_name: 'bentoml'
+    static_configs:
+      - targets: ['bentoml-service:3000']
+    metrics_path: '/metrics'
+    
+  # Validation Service
+  - job_name: 'validation-service'
+    static_configs:
+      - targets: ['validation-service:5001']
+    metrics_path: '/metrics'
+    
+  # Feature Engineering Service
+  - job_name: 'feature-service'
+    static_configs:
+      - targets: ['feature-service:5002']
+    metrics_path: '/metrics'
+    
+  # Feast Service
+  - job_name: 'feast-service'
+    static_configs:
+      - targets: ['feast-service:5003']
+    metrics_path: '/metrics'
+    
+  # Redis
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

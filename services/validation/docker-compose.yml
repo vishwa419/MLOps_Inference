@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  validation-service:
+    build: .
+    container_name: validation-service
+    ports:
+      - "5001:5001"
+    volumes:
+      - ../../data:/data:ro  # Mount data directory (read-only)
+      - ./reports:/app/reports  # Mount reports directory
+    environment:
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    networks:
+      - mlops-network
+
+networks:
+  mlops-network:
+    driver: bridge

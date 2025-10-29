@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+feast[redis]
+pandas
+numpy
+pyarrow
+pydantic
+redis

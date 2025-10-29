@@ -1,0 +1,119 @@
+# =========================
+# Python bytecode / cache
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# =========================
+# Virtual environments
+# =========================
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# =========================
+# Build / packaging
+# =========================
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# =========================
+# PyInstaller
+# =========================
+*.manifest
+*.spec
+
+# =========================
+# Testing / coverage
+# =========================
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+.tox/
+.nox/
+pytestdebug.log
+
+# =========================
+# Type checkers
+# =========================
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+.pytype/
+
+# =========================
+# Jupyter notebooks
+# =========================
+.ipynb_checkpoints
+*.ipynb_checkpoints
+
+# =========================
+# Data / model artifacts
+# =========================
+# Common datasets and exports
+*.csv
+*.tsv
+*.parquet
+*.jsonl
+
+# Pickle / model weights
+*.pkl
+*.joblib
+*.sav
+
+# ML experiment logs and checkpoints
+checkpoints/
+models/
+runs/
+wandb/
+mlruns/
+lightning_logs/
+outputs/
+logs/
+*.ckpt
+
+# =========================
+# Editors / IDEs
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# =========================
+# System files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Optional: local data
+# =========================
+data/
+tmp/
+

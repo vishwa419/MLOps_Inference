@@ -1,0 +1,210 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # INFRASTRUCTURE SERVICES
+  # ============================================
+  
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    hostname: zookeeper
+    container_name: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - mlops-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    hostname: kafka
+    container_name: kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+    networks:
+      - mlops-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - mlops-network
+
+  # ============================================
+  # ML MICROSERVICES
+  # ============================================
+  
+  validation-service:
+    build:
+      context: ./services/validation
+      dockerfile: Dockerfile
+    container_name: validation-service
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./data:/data
+      - ./reports:/app/reports
+    environment:
+      - SERVICE_NAME=validation-service
+    networks:
+      - mlops-network
+    restart: unless-stopped
+
+  feature-service:
+    build:
+      context: ./services/feature_engineering
+      dockerfile: Dockerfile
+    container_name: feature-service
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./data:/data
+      - ./features:/app/features
+    environment:
+      - SERVICE_NAME=feature-service
+    networks:
+      - mlops-network
+    restart: unless-stopped
+
+  feast-service:
+    build:
+      context: .
+      dockerfile: services/feast_service/Dockerfile
+    container_name: feast-service
+    ports:
+      - "5003:5003"
+    volumes:
+      - ./features:/app/features
+    environment:
+      - SERVICE_NAME=feast-service
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+    depends_on:
+      - redis
+    networks:
+      - mlops-network
+    restart: unless-stopped
+
+  bentoml-service:
+    build:
+      context: ./services/serving/
+      dockerfile: Dockerfile
+    container_name: bentoml-service
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+    environment:
+      - SERVICE_NAME=bentoml-service
+      - FEAST_URL=http://feast-service:5003
+    depends_on:
+      - feast-service
+    networks:
+      - mlops-network
+    restart: unless-stopped
+
+  # ============================================
+  # MONITORING SERVICES
+  # ============================================
+  
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./services/monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--web.enable-lifecycle'
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    networks:
+      - mlops-network
+      - monitoring
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3001:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./services/monitoring/grafana/provisioning:/etc/grafana/provisioning
+      - .services/monitoring/grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SERVER_ROOT_URL=http://localhost:3001
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    depends_on:
+      - prometheus
+    networks:
+      - mlops-network
+      - monitoring
+    restart: unless-stopped
+
+  # ============================================
+  # ML TRACKING
+  # ============================================
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.9.2
+    container_name: mlflow
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./mlruns:/mlflow/mlruns
+      - ./models:/mlflow/models
+    command: >
+      mlflow server
+      --backend-store-uri file:///mlflow/mlruns
+      --default-artifact-root file:///mlflow/models
+      --host 0.0.0.0
+      --port 5000
+    networks:
+      - mlops-network
+    restart: unless-stopped 
+
+# ============================================
+# VOLUMES
+# ============================================
+
+volumes:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+
+# ============================================
+# NETWORKS
+# ============================================
+
+networks:
+  mlops-network:
+    driver: bridge
+  monitoring:
+    driver: bridge
