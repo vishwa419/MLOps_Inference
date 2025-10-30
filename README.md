@@ -122,13 +122,13 @@ The system follows a microservices architecture with specialized components:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/mlops-streaming-recommendation.git
-   cd mlops-streaming-recommendation
+   git clone https://github.com/https://github.com/vishwa419/MLOps_Inference.git
+   cd MLOps_Inference
    ```
 
 2. **Create required directories**
    ```bash
-   mkdir -p data models features reports mlruns
+   mkdir -p data models mlruns
    ```
 
 3. **Start all services**
@@ -554,7 +554,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📬 Contact
 
 For questions or feedback:
-- Create an [Issue](https://github.com/yourusername/mlops-streaming-recommendation/issues)
 - Read the [Blog Post](https://medium.com/@kafkafranz495/mlops-inference-pipeline-building-a-streaming-recommendation-system-9e908fb23825)
 
 ---
